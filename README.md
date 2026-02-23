@@ -10,11 +10,11 @@ The LA.IO Badge Builder lets partners create embeddable badges for their website
 
 ## Features
 
-- **3 Badge Layouts:** Standard, Compact, Wordmark
-- **15 Preset Colors** + custom hex input
+- **3 Badge Layouts:** Standard, Pill (two-color), Horizontal
+- **15 Preset Colors** from official LA.IO brand palette + custom hex
 - **4 Sizes:** Small, Medium, Large, Auto
 - **Export Options:** Embed code, SVG, PNG, Markdown
-- **Admin Dashboard:** Analytics across all partners
+- **Admin Dashboard:** Password-protected analytics across all partners
 - **v1 Compatible:** Existing embed codes continue working
 
 ## Quick Start
@@ -31,6 +31,40 @@ cp .env.example .env.local
 npm run dev
 ```
 
+## Badge Embed Code
+
+### Standard / Horizontal (single color)
+```html
+<script async src="https://badgebuilder.la.io/badge.js"
+        data-slug="your-company"
+        data-color="#00BAFF"
+        data-size="m"
+        data-layout="standard"></script>
+```
+
+### Pill (two-color scheme)
+```html
+<script async src="https://badgebuilder.la.io/badge.js"
+        data-slug="your-company"
+        data-bg-color="#01233C"
+        data-fg-color="#63DCDE"
+        data-size="m"
+        data-layout="pill"></script>
+```
+
+### Parameters
+
+| Attribute | Default | Options |
+|-----------|---------|---------|
+| `data-slug` | required | Your organization name |
+| `data-color` | `#101948` | Any hex color (Standard/Horizontal) |
+| `data-bg-color` | — | Background hex color (Pill only) |
+| `data-fg-color` | — | Foreground hex color (Pill only) |
+| `data-size` | `m` | `s`, `m`, `l`, `auto` |
+| `data-layout` | `standard` | `standard`, `pill`, `horizontal` |
+| `data-target` | — | Element ID for custom placement |
+| `data-track` | enabled | Set to `0` to disable |
+
 ## Project Structure
 
 ```
@@ -38,12 +72,14 @@ src/
 ├── components/
 │   ├── builder/      # Badge creation UI
 │   ├── dashboard/    # Admin analytics components
-│   └── badges/       # SVG badge components
+│   ├── badges/       # SVG badge components (Standard, Pill, Horizontal)
+│   └── preview/      # Context previews (Footer, Sidebar, Signature)
 ├── pages/
 │   ├── BuilderPage.jsx
 │   └── DashboardPage.jsx
 └── lib/
-    ├── supabase.js   # Database client
+    ├── supabase.js   # Database client + admin auth
+    ├── validation.js # Color schemes + validation
     └── export.js     # Export utilities
 
 public/
@@ -51,7 +87,7 @@ public/
 └── fonts/            # Aktiv Grotesk TTF
 
 supabase/
-└── migrations/       # SQL schema + functions
+└── migrations/       # SQL schema + functions (001-007)
 
 scripts/
 └── migrate-sheets.js # v1 data migration
@@ -68,26 +104,12 @@ npm run format    # Prettier
 npm run migrate   # Run v1 data migration
 ```
 
-## Badge Embed Code
+## Routes
 
-```html
-<script async src="https://badgebuilder.la.io/badge.js"
-        data-slug="your-company"
-        data-color="#00BAFF"
-        data-size="m"
-        data-layout="standard"></script>
-```
-
-### Parameters
-
-| Attribute | Default | Options |
-|-----------|---------|---------|
-| `data-slug` | required | Your organization name |
-| `data-color` | `#111948` | Any hex color |
-| `data-size` | `m` | `s`, `m`, `l`, `auto` |
-| `data-layout` | `standard` | `standard`, `compact`, `wordmark` |
-| `data-target` | — | Element ID for custom placement |
-| `data-track` | enabled | Set to `0` to disable |
+| Path | Description |
+|------|-------------|
+| `/` | Badge builder |
+| `/dashboard` | Admin analytics dashboard (password protected) |
 
 ## Environment Variables
 
@@ -97,13 +119,6 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-## Routes
-
-| Path | Description |
-|------|-------------|
-| `/` | Badge builder |
-| `/dashboard` | Admin analytics dashboard |
-
 ## Tech Stack
 
 - React 18 + Vite
@@ -111,6 +126,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 - Supabase (Postgres + Edge Functions)
 - Recharts
 - html-to-image + file-saver
+- Vercel (hosting)
 
 ## License
 
