@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { ExportModal } from '@/components/builder/ExportModal'
+import { IntroModal } from '@/components/IntroModal'
 import { PreviewPanel } from '@/components/builder/PreviewPanel'
 import { getBadgeComponent } from '@/components/badges'
 import { FooterPreview } from '@/components/preview/FooterPreview'
@@ -46,6 +47,7 @@ function isColorTooDark(hex) {
 }
 
 export default function BuilderPage() {
+  const [showIntroModal, setShowIntroModal] = useState(() => !localStorage.getItem('laio_intro_dismissed'))
   const [showExportModal, setShowExportModal] = useState(false)
   const [mobilePreviewMode, setMobilePreviewMode] = useState('badge')
   const [config, setConfig] = useState({
@@ -135,13 +137,14 @@ export default function BuilderPage() {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && showExportModal) {
-        setShowExportModal(false)
+      if (e.key === 'Escape') {
+        if (showExportModal) setShowExportModal(false)
+        if (showIntroModal) setShowIntroModal(false)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [showExportModal])
+  }, [showExportModal, showIntroModal])
 
   // Register partner when embed code is copied
   const handleEmbedCopied = async () => {
@@ -731,6 +734,11 @@ export default function BuilderPage() {
           </div>
         </div>
       </main>
+
+      {/* Intro Modal */}
+      {showIntroModal && (
+        <IntroModal onClose={() => setShowIntroModal(false)} />
+      )}
 
       {/* Export Modal */}
       {showExportModal && (
