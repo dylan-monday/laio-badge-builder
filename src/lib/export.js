@@ -1,4 +1,4 @@
-import { toPng, toSvg } from 'html-to-image'
+import { toPng } from 'html-to-image'
 import { saveAs } from 'file-saver'
 
 /**
@@ -28,16 +28,29 @@ export async function exportAsPng(element, filename = 'laio-badge') {
 
 /**
  * Export badge as SVG file
- * @param {HTMLElement} element - Badge DOM element to export
+ * Serializes the native SVG element directly — no html-to-image foreignObject wrapping.
+ * @param {HTMLElement} element - Badge container or SVG element
  * @param {string} filename - Output filename (without extension)
  */
 export async function exportAsSvg(element, filename = 'laio-badge') {
   try {
-    const dataUrl = await toSvg(element)
+    // Find the SVG element — use it directly if already an SVG, otherwise search inside the container
+    const svgEl = element.tagName?.toLowerCase() === 'svg'
+      ? element
+      : element.querySelector('svg')
 
-    // Convert data URL to blob and trigger download
-    const response = await fetch(dataUrl)
-    const blob = await response.blob()
+    if (!svgEl) throw new Error('No SVG element found in container')
+
+    // Serialize to clean SVG markup
+    const serializer = new XMLSerializer()
+    let svgStr = serializer.serializeToString(svgEl)
+
+    // XMLSerializer sometimes omits the namespace declaration — ensure it's present
+    if (!svgStr.includes('xmlns="http://www.w3.org/2000/svg"')) {
+      svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
+    }
+
+    const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
     saveAs(blob, `${filename}.svg`)
 
     return { success: true }
