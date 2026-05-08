@@ -23,8 +23,10 @@ port = 54324
 [storage]
 enabled = true
 
-[functions]
-enabled = true
+# The track function is a public endpoint — badge.js sends unauthenticated
+# requests from third-party partner sites. JWT verification must stay OFF.
+[functions.track]
+verify_jwt = false
 
 [auth]
 enabled = false  # Not using Supabase Auth for this project
